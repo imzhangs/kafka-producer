@@ -1,0 +1,41 @@
+server.port: 10010
+kafka.topic: xigua-main-1
+zookeeper.server.hosts-ports: 192.168.1.221:2181,192.168.1.221:2182,192.168.1.221:2183
+kafka.server.hosts-ports: 192.168.1.221:9092,192.168.1.221:9093
+
+spring: 
+ application: 
+  name: news-kafka-producer
+ cloud: 
+   config: 
+    label: trunk
+    name: newsdoc-application
+    profile: dev
+ datasource: 
+  url: jdbc:mysql://127.0.0.1:3306/news_analysis?allowMultiQueries=true&useSSL=false&characterEncoding=utf8
+  username: aa
+  password: abccesdsd
+  driver-class-name: com.mysql.jdbc.Driver
+  type: com.alibaba.druid.pool.DruidDataSource
+  initialSize: 5
+  minIdle: 5
+  maxActive: 200
+  maxWait: 30000
+  timeBetweenEvictionRunsMillis: 60000
+  minEvictableIdleTimeMillis: 300000
+  validationQuery: SELECT 1 FROM DUAL
+  testWhileIdle: true
+  testOnBorrow: false
+  testOnReturn: false
+  poolPreparedStatements: true
+  maxPoolPreparedStatementPerConnectionSize: 20
+  filters: stat,wall,log4j
+
+
+index.save.url: http://192.168.1.221:9666/newsDoc/save
+send.kfk.threadpool.size: 10
+
+# logging
+logging.level.root: INFO
+#logging.level.org.springframework.web=DEBUG
+logging.file: /data/logs/kafka/data-producer.log
