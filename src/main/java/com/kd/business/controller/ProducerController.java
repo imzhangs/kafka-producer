@@ -54,13 +54,16 @@ public class ProducerController {
 	}
 
 	@RequestMapping(value = "/pushData", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_UTF8_VALUE })
-	public String pushData(@RequestBody String data) {
-		
-		ListenableFuture<SendResult<String, String>> resultFuture = kafkaTemplate.send(kafkaTopic, data);
-		if (resultFuture.isDone()) {
-			return "sent";
+	public ResponseSet pushData(@RequestBody KafkaMessage message) {
+		BaseResult result=new BaseResult();
+		if(StringUtils.isBlank(message.getTopic())){
+			return result.paramError("topic is null");
 		}
-		return "OK";
+		ListenableFuture<SendResult<String, String>> resultFuture = kafkaTemplate.send(message.getTopic(), JSONObject.toJSONString(message));
+		if (resultFuture.isDone()) {
+			return result.ok("sent done");
+		}
+		return result.ok();
 	}
 	
 	@RequestMapping(value = "/push")
