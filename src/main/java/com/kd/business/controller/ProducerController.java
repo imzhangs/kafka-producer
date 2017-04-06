@@ -1,6 +1,10 @@
 package com.kd.business.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.concurrent.ExecutorService;
+
+import javax.xml.crypto.URIDereferencer;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,7 @@ import com.kd.commons.domain.KafkaMessage;
 import com.kd.commons.enums.ExplainTypeEnum;
 import com.kd.commons.result.BaseResult;
 import com.kd.commons.result.ResponseSet;
+import com.kd.commons.utils.Base64;
 
 @RestController
 public class ProducerController {
@@ -55,15 +60,22 @@ public class ProducerController {
 
 	@RequestMapping(value = "/pushData", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_UTF8_VALUE })
 	public ResponseSet pushData(@RequestBody KafkaMessage message) {
-		BaseResult result=new BaseResult();
-		if(StringUtils.isBlank(message.getTopic())){
-			return result.paramError("topic is null");
+		return push(message);
+	}
+	
+	@RequestMapping(value = "/pushBase", method = RequestMethod.POST)
+	public ResponseSet pushBase(KafkaMessage message) throws Exception {
+		if(StringUtils.isNotBlank(message.getUrl())){
+			message.setUrl(Base64.decodeStr(message.getUrl()));
+			message.setUrl(URLDecoder.decode(message.getUrl(),"utf-8"));
 		}
-		ListenableFuture<SendResult<String, String>> resultFuture = kafkaTemplate.send(message.getTopic(), JSONObject.toJSONString(message));
-		if (resultFuture.isDone()) {
-			return result.ok("sent done");
+		
+		if(StringUtils.isNotBlank(message.getContent())){
+			message.setContent(Base64.decodeStr(message.getContent()));
+			message.setContent(URLDecoder.decode(message.getContent(),"utf-8"));
 		}
-		return result.ok();
+		
+		return push(message);
 	}
 	
 	@RequestMapping(value = "/push")
