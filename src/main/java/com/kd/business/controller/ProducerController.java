@@ -81,6 +81,9 @@ public class ProducerController {
 		if(StringUtils.isBlank(message.getTopic())){
 			return result.paramError("topic is null");
 		}
+		if(StringUtils.isBlank(message.getDocVersion())){
+			message.setDocVersion("1.0.1");
+		}
 		ListenableFuture<SendResult<String, String>> resultFuture = kafkaTemplate.send(message.getTopic(), JSONObject.toJSONString(message));
 		if (resultFuture.isDone()) {
 			return result.ok("sent done");
